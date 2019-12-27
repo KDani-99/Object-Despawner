@@ -194,15 +194,20 @@ namespace Despawner
                         if (poolObject != null && poolObject.Exists())
                             poolObject.Delete();
                     }
-                    if(typeof(IDictionary).IsAssignableFrom(value.GetType()))
+                    else if(typeof(IDictionary).IsAssignableFrom(value.GetType()))
                     {
                         // If it is a Dictionary, call the DestructDictionaries method
                         DestructDictionaries((IDictionary)value);
                     }
-                    if (typeof(IEnumerable).IsAssignableFrom(value.GetType()))
+                    else if (typeof(IEnumerable).IsAssignableFrom(value.GetType()))
                     {
                         // If it is an IEnumerable, call the DestructNested method
                         DestructNested((IEnumerable)value);
+                    }
+                    else if (value.GetType().IsGenericType && typleTypes.Contains(value.GetType().GetGenericTypeDefinition()))
+                    {
+                        // If it is a Tuple, call the DestructTuples method
+                        DestructTuples(value);
                     }
                 }
             }
