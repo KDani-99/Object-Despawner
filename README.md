@@ -1,5 +1,5 @@
 # Object-Despawner
-You can delete spawned PoolObjects (Peds,Vehicles,Blips,etc..) from the game if you define them in your class as property or field (static,private,public,protected)
+You can delete spawned PoolObjects (Peds,Vehicles,Blips,etc..) from the game if you define them in your class as a property or field (static,private,public,protected)
 
 ##### (Error might still occur)
 ## Tested with:
