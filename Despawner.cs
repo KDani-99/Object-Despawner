@@ -149,6 +149,7 @@ namespace Despawner
                 Debug.WriteLine("An error has occured in the Destruct() method, objects were not deleted " + ex.ToString());
             }
         }
+        /* Destruct Collections (Nested and not nested) */
         private static void DestructNested(IEnumerable collection)
         {
             foreach (var elem in collection)
@@ -178,6 +179,7 @@ namespace Despawner
                 }
             }
         }
+        /* Destruct Tuples */
         private static void DestructTuples(object tuple)
         {
             foreach (var prop in tuple.GetType().GetProperties())
@@ -205,7 +207,7 @@ namespace Despawner
                 }
             }
         }
-        /* Destruct dictionaries */
+        /* Destruct Dictionaries */
         private static void DestructDictionaries(IDictionary dictionary)
         {
             if (dictionary != null)
