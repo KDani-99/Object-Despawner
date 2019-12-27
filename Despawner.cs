@@ -37,9 +37,7 @@ namespace Despawner
                 .Where(field => typleTypes.Contains(field.FieldType.GetGenericTypeDefinition()))
                 .Select(field => new {
                     name = field.Name,
-                    value = field.GetValue(field.IsStatic
-                            ? null                     // we should provide null for static
-                            : obj)
+                    value = field.GetValue(obj)
                 })
                 .Where(item => item.value != null);
 
