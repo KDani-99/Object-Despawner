@@ -8,7 +8,8 @@ You can delete spawned PoolObjects (Peds,Vehicles,Blips,etc..) from the game if 
 - List
 - Dictionary
 - Tuple
-- (Should work with Queues and Stacks, not sure)
+- Queue
+- Stack
 
 #### You can even delete peds from:
 
