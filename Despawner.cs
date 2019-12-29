@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 namespace Despawner
 {
-    abstract class Destructable
+    abstract class Despawner
     {
-        private static HashSet<Type> typleTypes = new HashSet<Type>() {
+        /* Available Tuple Types */
+        private static HashSet<Type> TupleTypes = new HashSet<Type>() {
             typeof(Tuple<>),
             typeof(Tuple<,>),
             typeof(Tuple<,,>),
@@ -21,7 +22,7 @@ namespace Despawner
             typeof(Tuple<,,,,,,>),
             typeof(Tuple<,,,,,,,>),
          };
-        public static void Destruct(object obj)
+        public static void Despawn(object obj)
         {
             try
             {
@@ -34,7 +35,7 @@ namespace Despawner
                             BindingFlags.Static |
                             BindingFlags.FlattenHierarchy)
                 .Where(field => field.FieldType.IsGenericType)
-                .Where(field => typleTypes.Contains(field.FieldType.GetGenericTypeDefinition()))
+                .Where(field => TupleTypes.Contains(field.FieldType.GetGenericTypeDefinition()))
                 .Select(field => new {
                     name = field.Name,
                     value = field.GetValue(obj)
@@ -43,7 +44,7 @@ namespace Despawner
 
                 foreach (var tuple in fieldsWithTuples.Select(f => f.value))
                 {
-                    DestructTuples(tuple);
+                    SearchTuples(tuple);
                 }
 
                 /* Get Tuple properties in the class and check for PoolObject */
@@ -55,7 +56,7 @@ namespace Despawner
                             BindingFlags.Static |
                             BindingFlags.FlattenHierarchy)
                 .Where(prop => prop.PropertyType.IsGenericType)
-                .Where(prop => typleTypes.Contains(prop.PropertyType.GetGenericTypeDefinition()))
+                .Where(prop => TupleTypes.Contains(prop.PropertyType.GetGenericTypeDefinition()))
                 .Select(prop => new {
                     name = prop.Name,
                     value = prop.GetValue(obj)
@@ -64,7 +65,7 @@ namespace Despawner
 
                 foreach (var tuple in propertiesWithTuples.Select(f => f.value))
                 {
-                    DestructTuples(tuple);
+                    SearchTuples(tuple);
                 }
 
                 FieldInfo[] fields = obj.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
@@ -108,13 +109,13 @@ namespace Despawner
                     {
                         IDictionary dictionary = (IDictionary)elem.GetValue(obj);
                         if (dictionary != null)
-                            DestructDictionaries(dictionary);
+                            SearchDictionaries(dictionary);
                     }
                     else
                     {
                         IEnumerable collection = (IEnumerable)elem.GetValue(obj);
                         if (collection != null)
-                            DestructNested(collection);
+                            SearchNested(collection);
 
                     }
                     elem.SetValue(obj, null);
@@ -128,18 +129,18 @@ namespace Despawner
                     {
                         IDictionary dictionary = (IDictionary)elem.GetValue(obj, null);
                         if (dictionary != null)
-                            DestructDictionaries(dictionary);
+                            SearchDictionaries(dictionary);
                     }
                     else
                     {
                         IEnumerable collection = (IEnumerable)elem.GetValue(obj, null);
                         if (collection != null)
-                            DestructNested(collection);
+                            SearchNested(collection);
 
                     }
                     elem.SetValue(obj, null, null);
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -147,8 +148,8 @@ namespace Despawner
                 Debug.WriteLine("An error has occured in the Destruct() method, objects were not deleted " + ex.ToString());
             }
         }
-        /* Destruct Collections (Nested and not nested) */
-        private static void DestructNested(IEnumerable collection)
+        /* Search Collections (Nested and not nested) For PoolObjects */
+        private static void SearchNested(IEnumerable collection)
         {
             foreach (var elem in collection)
             {
@@ -164,21 +165,21 @@ namespace Despawner
                 else if (typeof(IDictionary).IsAssignableFrom(elem.GetType()))
                 {
                     // If it is a Dictionary, call the DestructDictionaries method
-                    DestructDictionaries((IDictionary)elem);
+                    SearchNested((IDictionary)elem);
                 }
                 else if (typeof(IEnumerable).IsAssignableFrom(elem.GetType()))
                 {
-                    DestructNested((IEnumerable)elem);
+                    SearchNested((IEnumerable)elem);
                 }
-                else if (elem.GetType().IsGenericType && typleTypes.Contains(elem.GetType().GetGenericTypeDefinition()))
+                else if (elem.GetType().IsGenericType && TupleTypes.Contains(elem.GetType().GetGenericTypeDefinition()))
                 {
                     // If it is a Tuple, call the DestructTuples method
-                    DestructTuples(elem);
+                    SearchTuples(elem);
                 }
             }
         }
-        /* Destruct Tuples */
-        private static void DestructTuples(object tuple)
+        /* Search Tuples For PoolObjects */
+        private static void SearchTuples(object tuple)
         {
             foreach (var prop in tuple.GetType().GetProperties())
             {
@@ -192,26 +193,26 @@ namespace Despawner
                         if (poolObject != null && poolObject.Exists())
                             poolObject.Delete();
                     }
-                    else if(typeof(IDictionary).IsAssignableFrom(value.GetType()))
+                    else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
                     {
                         // If it is a Dictionary, call the DestructDictionaries method
-                        DestructDictionaries((IDictionary)value);
+                        SearchDictionaries((IDictionary)value);
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(value.GetType()))
                     {
                         // If it is an IEnumerable, call the DestructNested method
-                        DestructNested((IEnumerable)value);
+                        SearchNested((IEnumerable)value);
                     }
-                    else if (value.GetType().IsGenericType && typleTypes.Contains(value.GetType().GetGenericTypeDefinition()))
+                    else if (value.GetType().IsGenericType && TupleTypes.Contains(value.GetType().GetGenericTypeDefinition()))
                     {
                         // If it is a Tuple, call the DestructTuples method
-                        DestructTuples(value);
+                        SearchTuples(value);
                     }
                 }
             }
         }
-        /* Destruct Dictionaries */
-        private static void DestructDictionaries(IDictionary dictionary)
+        /* Search Dictionaries For PoolObjects */
+        private static void SearchDictionaries(IDictionary dictionary)
         {
             if (dictionary != null)
             {
@@ -219,9 +220,9 @@ namespace Despawner
                 IEnumerable values = dictionary.Values;
 
                 if (keys != null)
-                    DestructNested(keys);
+                    SearchNested(keys);
                 if (values != null)
-                    DestructNested(values);
+                    SearchNested(values);
             }
         }
     }
