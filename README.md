@@ -35,6 +35,13 @@ and call it from somewhere else like
 ```csharp
   MyClass myclass = new MyClass();
   // poolobjects should be spawned
-  Destructable.Destruct(myclass);
-  // poolobjects should be deleted
+  try
+  {
+    Despawner.Despawn(myclass); 
+    // poolobjects should be deleted
+  } 
+  catch(Exception ex)
+  {
+    // handle exceptions
+  }
 ```
