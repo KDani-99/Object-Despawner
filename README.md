@@ -11,7 +11,8 @@ You can delete spawned PoolObjects (Peds,Vehicles,Blips,etc..) from the game if 
 - Queue
 - Stack
 
-#### You can even delete peds from:
+(Should work with IEnumerables)
+#### You can even delete objects from:
 
 ```csharp
 List<List<List<Dictionary<int, Ped>>>> ped = new List<List<List<Dictionary<int, Ped>>>>() { new List<List<Dictionary<int, Ped>>>() { new List<Dictionary<int, Ped>>() { new Dictionary<int, Ped>() { { 0,ped} } } } };
